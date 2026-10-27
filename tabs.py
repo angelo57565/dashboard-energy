@@ -77,7 +77,7 @@ def charts_tab(ctx, d):
         banner("info", "Sem leituras neste período.")
         return
     st.plotly_chart(charts.timeseries(df, which, mark, ctx.theme), theme=None, key="grafico")
-    st.download_button("⬇️ Baixar leituras (CSV)", readings_csv(rows),
+    st.download_button(" Baixar leituras (CSV)", readings_csv(rows),
                        file_name=f"leituras_{ctx.device}.csv", mime="text/csv", key="dl_leituras")
 
 
@@ -121,7 +121,7 @@ def consumption(ctx, d):
         else:
             banner("ok", f"Nesse ritmo você fecha o mês com {projected:.1f} kWh, dentro da meta.")
     else:
-        st.caption("Defina uma meta mensal em ⚙️ Configurações para ver a barra de progresso.")
+        st.caption("Defina uma meta mensal em  Configurações para ver a barra de progresso.")
 
     last24 = hourly[hourly["period"] >= now - pd.Timedelta(hours=24)]
     st.plotly_chart(charts.bars(last24["period"], last24["kwh"], ctx.theme, "Consumo por hora (últimas 24 h)"),
@@ -144,7 +144,7 @@ def anomalies_tab(ctx, d):
     else:
         st.subheader("Últimas anomalias")
         table(anomalies_table(anomalies).head(30))
-        st.download_button("⬇️ Baixar anomalias (CSV)", readings_csv(anomalies),
+        st.download_button(" Baixar anomalias (CSV)", readings_csv(anomalies),
                            file_name=f"anomalias_{ctx.device}.csv", mime="text/csv", key="dl_anomalias")
 
         pending = [a for a in anomalies if not a.get("feedback")][:8]
@@ -160,10 +160,10 @@ def anomalies_tab(ctx, d):
             if why:
                 st.caption(why)
             b1, b2 = st.columns(2)
-            if b1.button("✅ É real", key=f"real_{a['id']}"):
+            if b1.button("É real", key=f"real_{a['id']}"):
                 if _guard(ctx, lambda: ctx.api.put(f"/api/readings/{a['id']}/feedback", json={"label": "real"})):
                     rerun(ctx.auto)
-            if b2.button("❌ Falso alarme", key=f"false_{a['id']}"):
+            if b2.button(" Falso alarme", key=f"false_{a['id']}"):
                 if _guard(ctx, lambda: ctx.api.put(f"/api/readings/{a['id']}/feedback", json={"label": "false"})):
                     rerun(ctx.auto)
 
@@ -192,7 +192,7 @@ def alerts_tab(ctx, d):
     on = [n for n, v in (("Telegram", channels["telegram"]), ("E-mail", channels["email"])) if v]
     if on:
         banner("ok", "Avisos enviados por: " + ", ".join(on))
-        if st.button("📨 Enviar mensagem de teste", key="teste_notif"):
+        if st.button(" Enviar mensagem de teste", key="teste_notif"):
             _guard(ctx, lambda: banner("info", "Teste enviado." if ctx.api.post("/api/alerts/test")["sent"]
                                        else "Nenhum canal conseguiu enviar."))
     else:
@@ -214,12 +214,12 @@ def alerts_tab(ctx, d):
             body["enabled"] = not rule["enabled"]
             if _guard(ctx, lambda: ctx.api.put(f"/api/alerts/rules/{rule['id']}", json=body)):
                 rerun(ctx.auto)
-        if b2.button("🗑 Excluir", key=f"del_{rule['id']}"):
+        if b2.button("Excluir", key=f"del_{rule['id']}"):
             if _guard(ctx, lambda: ctx.api.delete(f"/api/alerts/rules/{rule['id']}")):
                 rerun(ctx.auto)
 
     vmin, vmax = _voltage_range(ctx.nominal)
-    if st.button(f"✨ Criar regras sugeridas ({ctx.nominal} V)", key="sugeridas"):
+    if st.button(f"Criar regras sugeridas ({ctx.nominal} V)", key="sugeridas"):
         base = {"cooldown_s": 600, "enabled": True, "device_id": None}
         suggested = [
             {"name": "Tensão baixa", "metric": "voltage", "operator": "<", "threshold": vmin},
@@ -231,7 +231,7 @@ def alerts_tab(ctx, d):
         if _guard(ctx, lambda: [ctx.api.post("/api/alerts/rules", json={**base, **r}) for r in suggested]):
             rerun(ctx.auto)
 
-    with st.expander("➕ Nova regra"):
+    with st.expander(" Nova regra"):
         with st.form("form_regra", clear_on_submit=True):
             name = st.text_input("Nome", "Corrente alta")
             metric = st.selectbox("Grandeza", list(METRICS_PT), format_func=lambda m: f"{METRICS_PT[m][0]} ({METRICS_PT[m][1]})".replace(" ()", ""))
@@ -347,7 +347,7 @@ def validation(ctx, d):
                      format_func=lambda q: QUANTITY_PT[q][0])
     st.plotly_chart(charts.validation_scatter(df, q_sel, ctx.theme), theme=None, key="val_scatter")
     table(validation_table(df).head(30))
-    st.download_button("⬇️ Baixar validação (CSV)", validation_csv(df), file_name=f"validacao_{ctx.device}.csv",
+    st.download_button("Baixar validação (CSV)", validation_csv(df), file_name=f"validacao_{ctx.device}.csv",
                        mime="text/csv", key="dl_val")
 
     with st.expander("Apagar um registro"):
@@ -369,7 +369,7 @@ def model_tab(ctx, d):
         st.caption(f"Último treino: {model['trained_at']} (UTC). Leituras marcadas como anomalia real ficam fora do treino.")
     else:
         banner("warn", "Ainda não treinado. Treina sozinho ao juntar leituras suficientes, ou clique abaixo.")
-    if st.button("🧠 Treinar agora", key="treinar"):
+    if st.button("Treinar agora", key="treinar"):
         try:
             info = ctx.api.post("/api/model/train")
             banner("ok", f"Modelo treinado com {info['n_samples']} leituras.")
@@ -385,7 +385,7 @@ def model_tab(ctx, d):
         banner("danger", f"Erro ao consultar a avaliação: {exc}")
         return
     if not ev["labeled"]:
-        banner("info", "Marque anomalias como ✅ real ou ❌ falso alarme na aba Anomalias para ver a precisão.")
+        banner("info", "Marque anomalias como  real ou  falso alarme na aba Anomalias para ver a precisão.")
         return
 
     def pct(x):
