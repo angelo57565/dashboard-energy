@@ -16,21 +16,21 @@ from helpers import age_seconds, human_age, to_dataframe
 from theme import build_css
 from ui import banner
 
-st.set_page_config(page_title="EnergyGuard", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="EnergyGuard", page_icon="", layout="wide")
 
 PERIODS = {"15 minutos": 0.25, "1 hora": 1, "6 horas": 6, "24 horas": 24}
-THEME_OPTIONS = ["🌙 Escuro", "☀️ Claro (alto contraste)"]
+THEME_OPTIONS = [" Modo escuro", "Modo Claro (alto contraste)"]
 OFFLINE_AFTER_S = 30
 
 # ----------------------------- barra lateral (ordem visual) -----------------------------
 with st.sidebar:
-    st.title("⚡ EnergyGuard")
+    st.title(" EnergyGuard")
     theme_slot = st.container()
     device_slot = st.container()
     period_slot = st.container()
     refresh_slot = st.container()
-    config_slot = st.expander("⚙️ Configurações")
-    conn_slot = st.expander("🔌 Conexão com a API")
+    config_slot = st.expander(" Configurações")
+    conn_slot = st.expander(" Conexão com a API")
 
 with conn_slot:
     api_url = st.text_input("URL da API", os.getenv("API_URL", "http://localhost:8000")).rstrip("/")
@@ -67,7 +67,7 @@ with config_slot:
     st.selectbox("Tensão nominal da rede (V)", [127, 220], key="cfg_nominal")
     st.number_input("Meta mensal (kWh, 0 = sem meta)", min_value=0.0, step=10.0, key="cfg_goal")
     st.number_input("Intervalo de envio do ESP32 (s)", min_value=1, step=1, key="cfg_interval")
-    if st.button("💾 Salvar configurações"):
+    if st.button(" Salvar configurações"):
         try:
             api.put("/api/settings", json={
                 "tariff": float(st.session_state.cfg_tariff),
@@ -85,7 +85,7 @@ with period_slot:
 with refresh_slot:
     auto = st.toggle("Atualizar automaticamente", value=True)
     every = st.slider("Intervalo (s)", 5, 60, 10) if auto else None
-    st.button("🔄 Atualizar agora")
+    st.button("Atualizar agora")
 
 hours = PERIODS[period_label]
 
@@ -129,14 +129,14 @@ def render() -> None:
 
     age = age_seconds(latest["created_at"])
     if age <= OFFLINE_AFTER_S:
-        banner("ok", f"🟢 {device} online · última leitura há {human_age(age)}")
+        banner("ok", f" {device} online · última leitura há {human_age(age)}")
     else:
-        banner("danger", f"🔴 {device} sem dados há {human_age(age)}")
+        banner("danger", f" {device} sem dados há {human_age(age)}")
     if latest["is_anomaly"]:
-        banner("warn", f"⚠️ A última leitura foi marcada como anomalia (score {latest['anomaly_score']:.3f}).")
+        banner("warn", f" A última leitura foi marcada como anomalia (score {latest['anomaly_score']:.3f}).")
 
-    t = st.tabs(["📊 Visão geral", "📈 Gráficos", "🔋 Consumo", f"⚠️ Anomalias ({len(anomalies)})",
-                 "🔔 Alertas", "🩺 Qualidade e saúde", "🧪 Validação", "🤖 Modelo"])
+    t = st.tabs(["Visão geral", " Gráficos", " Consumo", f" Anomalias ({len(anomalies)})",
+                 " Alertas", " Qualidade e saúde", " Validação", " Modelo"])
     with t[0]:
         tabs.overview(ctx, data)
     with t[1]:
